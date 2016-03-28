@@ -57,6 +57,8 @@ struct _eo_ui_t {
 	LV2_URID atom_string;
 	char title [512];
 
+	volatile int done;
+
 	union {
 		// eo iface
 		struct {
@@ -66,7 +68,6 @@ struct _eo_ui_t {
 
 		// show iface
 		struct {
-			volatile int done;
 		} ui;
 
 #if defined(X11_UI_WRAP)
@@ -98,7 +99,7 @@ _idle_cb(LV2UI_Handle instance)
 
 	ecore_main_loop_iterate();
 
-	return eoui->ui.done;
+	return eoui->done;
 }
 
 static const LV2UI_Idle_Interface idle_ext = {
@@ -113,7 +114,7 @@ _show_delete_request(void *data, Evas_Object *obj, void *event_info)
 		return;
 
 	// set done flag, host will then call _hide_cb
-	eoui->ui.done = 1;
+	eoui->done = 1;
 }
 
 // Show Interface
@@ -182,7 +183,7 @@ _hide_cb(LV2UI_Handle instance)
 	}
 
 	// reset done flag
-	eoui->ui.done = 0;
+	eoui->done = 0;
 
 	return 0;
 }
